@@ -1,0 +1,84 @@
+<div class="page">
+  <nav class="nav">
+	<span class="logo">DataShare</span>
+	<button class="btn-nav" routerLink="/login">Se connecter</button>
+  </nav>
+
+  <section class="card-wrap desktop-only">
+	<div class="card">
+	  <h2>Telecharger un fichier</h2>
+
+	  @if (error) {
+		<div class="alert alert-error">{{ error }}</div>
+	  }
+
+	  @if (state !== 'expired') {
+		<div class="file-row file-row-plain">
+		  <span class="file-icon">[F]</span>
+		  <div class="file-info">
+			<div class="file-name">Fichier partage</div>
+			<div class="file-sub">Token: {{ token || 'invalide' }}</div>
+		  </div>
+		</div>
+	  }
+
+	  @if (state === 'pwd') {
+		<div class="alert alert-info">Ce fichier expirera dans 3 jours.</div>
+		<label for="dl-pwd">Mot de passe</label>
+		<input id="dl-pwd" type="password" placeholder="Saisissez le mot de passe" [(ngModel)]="password" />
+	  }
+
+	  @if (state === 'warn') {
+		<div class="alert alert-warn">Ce fichier expirera demain.</div>
+	  }
+
+	  @if (state === 'expired') {
+		<div class="alert alert-error">Ce fichier n'est plus disponible en telechargement car il a expire.</div>
+	  }
+
+	  <button class="btn-main" [disabled]="isDownloading || !canDownload" (click)="onDownloadShared()">
+		{{ isDownloading ? 'Telechargement...' : 'Telecharger' }}
+	  </button>
+	</div>
+  </section>
+
+  <section class="sheet-wrap mobile-only">
+	<div class="sheet">
+	  <h2>Telecharger un fichier</h2>
+
+	  @if (error) {
+		<div class="alert alert-error">{{ error }}</div>
+	  }
+
+	  @if (state !== 'expired') {
+		<div class="file-row file-row-plain">
+		  <span class="file-icon">[F]</span>
+		  <div class="file-info">
+			<div class="file-name">Fichier partage</div>
+			<div class="file-sub">Token: {{ token || 'invalide' }}</div>
+		  </div>
+		</div>
+	  }
+
+	  @if (state === 'pwd') {
+		<div class="alert alert-info">Ce fichier expirera dans 3 jours.</div>
+		<label for="dl-pwd-m">Mot de passe</label>
+		<input id="dl-pwd-m" type="password" placeholder="Saisissez le mot de passe" [(ngModel)]="password" />
+	  }
+
+	  @if (state === 'warn') {
+		<div class="alert alert-warn">Ce fichier expirera demain.</div>
+	  }
+
+	  @if (state === 'expired') {
+		<div class="alert alert-error">Ce fichier n'est plus disponible en telechargement car il a expire.</div>
+	  }
+
+	  <button class="btn-main" [disabled]="isDownloading || !canDownload" (click)="onDownloadShared()">
+		{{ isDownloading ? 'Telechargement...' : 'Telecharger' }}
+	  </button>
+	</div>
+  </section>
+
+  <footer class="footer desktop-only">Copyright DataShare 2026</footer>
+</div>

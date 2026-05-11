@@ -1,0 +1,108 @@
+<div class="page">
+  <nav class="nav">
+    <span class="logo">DataShare</span>
+    @if (isAuthenticated) {
+      <button class="btn-nav" routerLink="/my-space">Mon espace</button>
+    } @else {
+      <button class="btn-nav" routerLink="/login">Se connecter</button>
+    }
+  </nav>
+
+  <div class="upload-layout">
+    <section class="card-wrap desktop-only">
+      <div class="card">
+        <h2>Ajouter un fichier</h2>
+
+        @if (error) {
+          <div id="upload-error-desktop" class="alert-danger" role="alert" aria-live="assertive">{{ error }}</div>
+        }
+
+        @if (selectedFile) {
+          <div class="file-row file-row-upload">
+            <span class="file-icon">[F]</span>
+            <div class="file-info">
+              <div class="file-name">{{ selectedFile.name }}</div>
+              <div class="file-sub">{{ (selectedFile.size / 1048576).toFixed(2) }} Mo</div>
+            </div>
+          <button class="btn-sm" type="button" (click)="fileInputDesktop.click()" aria-label="Changer le fichier selectionne">Changer</button>
+          </div>
+        } @else {
+          <button class="btn-main" type="button" (click)="fileInputDesktop.click()">
+            Selectionner un fichier
+          </button>
+        }
+
+        <input #fileInputDesktop id="file-input-desktop" type="file" class="hidden-input" [accept]="acceptedMimeTypes.join(',')" aria-describedby="upload-hint-desktop upload-error-desktop" (change)="onFileSelected($event)" />
+
+        <div id="upload-hint-desktop" class="upload-hint">
+          <strong>Fichiers acceptes :</strong> {{ acceptedFileTypesLabel }}<br />
+          <strong>Taille maximale :</strong> &lt; 1 Go
+        </div>
+
+        <label for="up-pwd-d">Mot de passe</label>
+        <input id="up-pwd-d" type="password" placeholder="Optionnel" [(ngModel)]="uploadPassword" autocomplete="new-password" />
+
+        <label for="upload-expiration">Expiration</label>
+        <select id="upload-expiration" [(ngModel)]="expirationDays">
+          <option value="1">Une journee</option>
+          <option value="3">3 jours</option>
+          <option value="7">Une semaine</option>
+          <option value="30">Un mois</option>
+        </select>
+
+        <button class="btn-main" [disabled]="isLoading || !selectedFile" [attr.aria-busy]="isLoading" (click)="onUpload()">
+          {{ isLoading ? 'Televersement...' : 'Televerser' }}
+        </button>
+      </div>
+    </section>
+
+    <section class="sheet-wrap mobile-only">
+      <div class="sheet">
+        <h2>Ajouter un fichier</h2>
+
+        @if (error) {
+          <div id="upload-error-mobile" class="alert-danger" role="alert" aria-live="assertive">{{ error }}</div>
+        }
+
+        @if (selectedFile) {
+          <div class="file-row file-row-upload">
+            <span class="file-icon">[F]</span>
+            <div class="file-info">
+              <div class="file-name">{{ selectedFile.name }}</div>
+              <div class="file-sub">{{ (selectedFile.size / 1048576).toFixed(2) }} Mo</div>
+            </div>
+            <button class="btn-sm" type="button" (click)="fileInputMobile.click()" aria-label="Changer le fichier selectionne">Changer</button>
+          </div>
+        } @else {
+          <button class="btn-main" type="button" (click)="fileInputMobile.click()">
+            Selectionner un fichier
+          </button>
+        }
+
+        <input #fileInputMobile id="file-input-mobile" type="file" class="hidden-input" [accept]="acceptedMimeTypes.join(',')" aria-describedby="upload-hint-mobile upload-error-mobile" (change)="onFileSelected($event)" />
+
+        <div id="upload-hint-mobile" class="upload-hint">
+          <strong>Fichiers acceptes :</strong> {{ acceptedFileTypesLabel }}<br />
+          <strong>Taille maximale :</strong> &lt; 1 Go
+        </div>
+
+        <label for="up-pwd-m">Mot de passe</label>
+        <input id="up-pwd-m" type="password" placeholder="Optionnel" [(ngModel)]="uploadPassword" autocomplete="new-password" />
+
+        <label for="upload-expiration-mobile">Expiration</label>
+        <select id="upload-expiration-mobile" [(ngModel)]="expirationDays">
+          <option value="1">Une journee</option>
+          <option value="3">3 jours</option>
+          <option value="7">Une semaine</option>
+          <option value="30">Un mois</option>
+        </select>
+
+        <button class="btn-main" [disabled]="isLoading || !selectedFile" [attr.aria-busy]="isLoading" (click)="onUpload()">
+          {{ isLoading ? 'Televersement...' : 'Televerser' }}
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <footer class="footer desktop-only">Copyright DataShare 2026</footer>
+</div>

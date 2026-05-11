@@ -1,0 +1,413 @@
+openapi: 3.0.3
+info:
+  title: Backend Platform API
+  version: 1.0.0-SNAPSHOT
+  description: Contrat du prototype (authentification JWT, fichiers, liens de partage)
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/login:
+    post:
+      summary: Authentifie l'utilisateur et retourne un JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authentification reussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: Requete invalide
+        '401':
+          description: Identifiants invalides
+        '429':
+          description: Trop de tentatives de connexion
+  /api/register:
+    post:
+      summary: Cree un compte utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '204':
+          description: Compte cree
+        '400':
+          description: Requete invalide
+        '409':
+          description: Login deja utilise
+  /api/me:
+    get:
+      summary: Retourne l'identite de l'utilisateur authentifie
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Utilisateur authentifie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeResponse'
+        '401':
+          description: Token absent ou invalide
+  /api/files:
+    get:
+      summary: Retourne la liste des fichiers de l'utilisateur authentifie
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - in: query
+          name: size
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 20
+      responses:
+        '200':
+          description: Page des fichiers de l'utilisateur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileInfoPageResponse'
+        '401':
+          description: Token absent ou invalide
+    post:
+      summary: Upload un fichier utilisateur
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                password:
+                  type: string
+                  description: Mot de passe optionnel pour proteger le fichier a l'upload
+      responses:
+        '200':
+          description: Upload reussi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResponse'
+        '400':
+          description: Fichier vide ou requete invalide
+        '401':
+          description: Token absent ou invalide
+        '413':
+          description: Fichier trop volumineux
+        '415':
+          description: Type de fichier non autorise ou signature incoherente avec le type declare
+        '507':
+          description: Quota de stockage depasse
+  /api/files/history:
+    get:
+      summary: Retourne l'historique des actions fichiers de l'utilisateur authentifie
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - in: query
+          name: size
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 20
+      responses:
+        '200':
+          description: Page de l'historique des actions fichiers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileHistoryPageResponse'
+        '401':
+          description: Token absent ou invalide
+  /api/files/{storedFileName}:
+    get:
+      summary: Telecharge un fichier utilisateur
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: storedFileName
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Fichier trouve
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Token absent ou invalide
+        '403':
+          description: Acces au fichier refuse
+        '404':
+          description: Fichier introuvable
+    delete:
+      summary: Supprime un fichier utilisateur
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: storedFileName
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Fichier supprime
+        '401':
+          description: Token absent ou invalide
+        '403':
+          description: Acces au fichier refuse
+        '404':
+          description: Fichier introuvable
+  /api/files/{storedFileName}/shares:
+    post:
+      summary: Cree un lien de partage pour un fichier
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: storedFileName
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: expiresInSeconds
+          required: false
+          schema:
+            type: integer
+            format: int64
+            default: 3600
+      responses:
+        '200':
+          description: Lien de partage cree
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShareLinkResponse'
+        '401':
+          description: Token absent ou invalide
+        '403':
+          description: Acces au fichier refuse
+        '404':
+          description: Fichier introuvable
+  /api/files/shared/{token}:
+    get:
+      summary: Telecharge un fichier via un lien de partage public
+      parameters:
+        - in: path
+          name: token
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Fichier partage trouve
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Lien de partage introuvable
+        '410':
+          description: Lien de partage expire
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - login
+        - password
+      properties:
+        login:
+          type: string
+          example: demo
+        password:
+          type: string
+          example: demo123
+    LoginResponse:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+    RegisterRequest:
+      type: object
+      required:
+        - login
+        - password
+      properties:
+        login:
+          type: string
+          example: demo
+        password:
+          type: string
+          example: demo12345
+    MeResponse:
+      type: object
+      required:
+        - login
+      properties:
+        login:
+          type: string
+          example: demo
+    UploadResponse:
+      type: object
+      required:
+        - storedFileName
+        - originalFileName
+        - contentType
+        - size
+      properties:
+        storedFileName:
+          type: string
+        originalFileName:
+          type: string
+        contentType:
+          type: string
+        size:
+          type: integer
+          format: int64
+    FileInfoResponse:
+      type: object
+      required:
+        - storedFileName
+        - originalFileName
+        - contentType
+        - size
+        - createdAt
+        - passwordProtected
+      properties:
+        storedFileName:
+          type: string
+        originalFileName:
+          type: string
+        contentType:
+          type: string
+        size:
+          type: integer
+          format: int64
+        createdAt:
+          type: string
+          format: date-time
+        passwordProtected:
+          type: boolean
+    FileInfoPageResponse:
+      allOf:
+        - $ref: '#/components/schemas/PageMetadata'
+        - type: object
+          required:
+            - content
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/FileInfoResponse'
+    ShareLinkResponse:
+      type: object
+      required:
+        - token
+        - shareUrl
+        - storedFileName
+        - expiresAt
+      properties:
+        token:
+          type: string
+        shareUrl:
+          type: string
+          description: URL publique a ouvrir dans le frontend, au format /download/{token}
+        storedFileName:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+    FileHistoryResponse:
+      type: object
+      required:
+        - action
+        - storedFileName
+        - originalFileName
+        - occurredAt
+      properties:
+        action:
+          type: string
+          example: UPLOAD
+        storedFileName:
+          type: string
+        originalFileName:
+          type: string
+        occurredAt:
+          type: string
+          format: date-time
+    FileHistoryPageResponse:
+      allOf:
+        - $ref: '#/components/schemas/PageMetadata'
+        - type: object
+          required:
+            - content
+          properties:
+            content:
+              type: array
+              items:
+                $ref: '#/components/schemas/FileHistoryResponse'
+    PageMetadata:
+      type: object
+      required:
+        - totalElements
+        - totalPages
+        - size
+        - number
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+

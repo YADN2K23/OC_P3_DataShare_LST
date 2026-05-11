@@ -1,0 +1,52 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: backend-platform-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: backend_platform
+      POSTGRES_USER: datashare
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in datashare-backend/.env}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U datashare -d backend_platform"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  user-backend-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend-platform-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in datashare-backend/.env}
+      JWT_EXPIRATION_MILLIS: 86400000
+      APP_FRONTEND_BASE_URL: http://localhost:4200
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: backend_platform
+      POSTGRES_USER: datashare
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in datashare-backend/.env}
+      APP_UPLOAD_STORAGE_DIR: /data/uploads
+      APP_UPLOAD_MAX_SIZE_BYTES: 1073741823
+      APP_UPLOAD_MAX_TOTAL_SIZE_BYTES: 1073741823
+      APP_UPLOAD_MAX_FILE_NAME_LENGTH: 120
+      APP_UPLOAD_ALLOWED_CONTENT_TYPES: text/plain,image/png,image/jpeg,application/pdf
+    ports:
+      - "8080:8080"
+    volumes:
+      - uploads_data:/data/uploads
+
+volumes:
+  postgres_data:
+  uploads_data:
+

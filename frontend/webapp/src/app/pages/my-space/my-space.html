@@ -1,0 +1,112 @@
+<div class="page page-dashboard">
+  <nav class="nav desktop-only nav-dashboard">
+    <span class="logo logo-white">DataShare</span>
+    <div class="dash-nav-top">
+      <a class="btn-add" routerLink="/upload">Ajouter des fichiers</a>
+      <button class="btn-logout" type="button" (click)="onLogout()">Deconnexion</button>
+    </div>
+  </nav>
+
+  <div class="dash-outer desktop-only">
+    <aside class="sidebar">
+      <div class="sidebar-item">Mes fichiers</div>
+    </aside>
+
+    <main class="main-content">
+      <h1 class="dash-title">Mes fichiers</h1>
+
+      <div class="tabs">
+        <button class="tab" [class.active]="activeTab === 'all'" (click)="setFilter('all')">Tous</button>
+        <button class="tab" [class.active]="activeTab === 'active'" (click)="setFilter('active')">Actifs</button>
+        <button class="tab" [class.active]="activeTab === 'expired'" (click)="setFilter('expired')">Expire</button>
+      </div>
+
+      @if (filesError) {
+        <div class="alert alert-error">{{ filesError }}</div>
+      }
+
+      @if (isLoadingFiles) {
+        <p class="empty-state">Chargement des fichiers...</p>
+      } @else if (filteredFiles.length === 0) {
+        <p class="empty-state">Aucun fichier pour ce filtre.</p>
+      } @else {
+        @for (file of filteredFiles; track file.storedFileName) {
+          <div class="file-row">
+            <span class="file-icon">{{ fileIcon(file) }}</span>
+            <div class="file-info">
+              <div class="file-name">{{ file.originalFileName }}</div>
+              <div class="file-sub" [class.file-sub-exp]="isExpired(file)">{{ expirationLabel(file) }}</div>
+            </div>
+            @if (isProtected(file)) {
+              <span class="file-lock" title="Fichier protege">🔒</span>
+            }
+            <div class="file-actions">
+              <button class="btn-sm danger" type="button" (click)="onDeleteFile(file.storedFileName)">Supprimer</button>
+              <button class="btn-sm" type="button" (click)="onDownloadFile(file.storedFileName)">Acceder</button>
+            </div>
+          </div>
+        }
+      }
+    </main>
+  </div>
+
+  <div class="mob-nav mobile-only">
+    <button class="mob-hamburger" type="button" (click)="toggleDrawer(true)">≡</button>
+    <div class="mob-user">
+      <div class="mob-avatar"></div>
+      <span>{{ userName || 'Utilisateur' }}</span>
+    </div>
+    <div class="mob-spacer"></div>
+  </div>
+
+  <main class="mob-main mobile-only">
+    <h1 class="dash-title">Mes fichiers</h1>
+
+    <div class="tabs">
+      <button class="tab" [class.active]="activeTab === 'all'" (click)="setFilter('all')">Tous</button>
+      <button class="tab" [class.active]="activeTab === 'active'" (click)="setFilter('active')">Actifs</button>
+      <button class="tab" [class.active]="activeTab === 'expired'" (click)="setFilter('expired')">Expire</button>
+    </div>
+
+    @if (filesError) {
+      <div class="alert alert-error">{{ filesError }}</div>
+    }
+
+    @if (isLoadingFiles) {
+      <p class="empty-state">Chargement des fichiers...</p>
+    } @else if (filteredFiles.length === 0) {
+      <p class="empty-state">Aucun fichier pour ce filtre.</p>
+    } @else {
+      @for (file of filteredFiles; track file.storedFileName) {
+        <div class="file-row">
+          <span class="file-icon">{{ fileIcon(file) }}</span>
+          <div class="file-info">
+            <div class="file-name">{{ file.originalFileName }}</div>
+            <div class="file-sub" [class.file-sub-exp]="isExpired(file)">{{ expirationLabel(file) }}</div>
+          </div>
+          @if (isProtected(file)) {
+            <span class="file-lock" title="Fichier protege">🔒</span>
+          }
+          <div class="dot-menu-wrap">
+            <button class="dot-btn" type="button" (click)="toggleActions(file.storedFileName)">⋮</button>
+            <div class="dot-dropdown" [class.open]="openedActionsFor === file.storedFileName">
+              <button type="button" (click)="onDownloadFile(file.storedFileName); closeActions()">Acceder</button>
+              <button class="danger" type="button" (click)="onDeleteFile(file.storedFileName); closeActions()">Supprimer</button>
+            </div>
+          </div>
+        </div>
+      }
+    }
+  </main>
+
+  <div class="drawer-overlay" [class.open]="isDrawerOpen" (click)="toggleDrawer(false)"></div>
+  <div class="drawer" [class.open]="isDrawerOpen">
+    <button class="drawer-close" type="button" (click)="toggleDrawer(false)">X DataShare</button>
+    <div class="drawer-item" (click)="setFilter('all'); toggleDrawer(false)">Mes fichiers</div>
+    <a class="drawer-item" routerLink="/upload" (click)="toggleDrawer(false)">Ajouter des fichiers</a>
+    <button class="drawer-item drawer-item-outline" type="button" (click)="onLogout()">Deconnexion</button>
+    <div class="drawer-footer">Copyright DataShare 2026</div>
+  </div>
+
+  <footer class="footer footer-soft desktop-only">Copyright DataShare 2026</footer>
+</div>

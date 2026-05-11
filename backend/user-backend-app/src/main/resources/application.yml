@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: user-backend-app
+  servlet:
+    multipart:
+      max-file-size: ${SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE:1073741823B}
+      max-request-size: ${SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE:1073741823B}
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DATABASE:backend_platform}
+    username: ${POSTGRES_USER:backend}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration-millis: ${JWT_EXPIRATION_MILLIS:86400000}
+
+app:
+  frontend-base-url: ${APP_FRONTEND_BASE_URL:http://localhost:4200}
+  upload:
+    storage-dir: ${APP_UPLOAD_STORAGE_DIR:uploads}
+    max-size-bytes: ${APP_UPLOAD_MAX_SIZE_BYTES:1073741823}
+    max-total-size-bytes: ${APP_UPLOAD_MAX_TOTAL_SIZE_BYTES:1073741823}
+    max-file-name-length: ${APP_UPLOAD_MAX_FILE_NAME_LENGTH:120}
+    allowed-content-types: ${APP_UPLOAD_ALLOWED_CONTENT_TYPES:text/plain,image/png,image/jpeg,application/pdf}
+

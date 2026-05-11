@@ -1,0 +1,19 @@
+<div class="page">
+  <nav class="nav">
+    <span class="logo">DataShare</span>
+    <button class="btn-nav" routerLink="/my-space">Mon espace</button>
+  </nav>
+
+  <section class="upload-hero">
+    <p>Tu veux partager un fichier ?</p>
+    <label class="upload-trigger" for="f-logged">
+      <span class="upload-circle-outer">
+        <span class="upload-circle-inner">↑</span>
+      </span>
+    </label>
+    <input id="f-logged" type="file" class="hidden-input" (change)="onPickFile($event)" />
+  </section>
+
+  <footer class="footer">Copyright DataShare 2026</footer>
+</div>
+

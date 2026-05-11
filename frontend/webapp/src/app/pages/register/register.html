@@ -1,0 +1,32 @@
+<div class="page">
+  <nav class="nav">
+    <span class="logo">DataShare</span>
+    <button class="btn-nav" routerLink="/login">Se connecter</button>
+  </nav>
+
+  <section class="card-wrap">
+    <div class="card">
+      <h2>Creer un compte</h2>
+
+      @if (error) {
+        <div id="register-error" class="alert alert-error" role="alert" aria-live="assertive">{{ error }}</div>
+      }
+
+      <label for="register-email">Email</label>
+      <input id="register-email" type="email" placeholder="Saisissez votre email" [(ngModel)]="email" autocomplete="username" [attr.aria-invalid]="error ? 'true' : null" [attr.aria-describedby]="error ? 'register-error' : null" />
+
+      <label for="register-password">Mot de passe</label>
+      <input id="register-password" type="password" placeholder="Saisissez votre mot de passe" [(ngModel)]="password" autocomplete="new-password" [attr.aria-invalid]="error ? 'true' : null" [attr.aria-describedby]="error ? 'register-error' : null" />
+
+      <label for="register-confirm">Verification du mot de passe</label>
+      <input id="register-confirm" type="password" placeholder="Saisissez-le a nouveau" [(ngModel)]="confirmPassword" autocomplete="new-password" [attr.aria-invalid]="error ? 'true' : null" [attr.aria-describedby]="error ? 'register-error' : null" />
+
+      <a class="link-btn" routerLink="/login">J'ai deja un compte</a>
+      <button class="btn-main" [disabled]="isLoading" [attr.aria-busy]="isLoading" (click)="onRegister()">
+        {{ isLoading ? 'Creation...' : 'Creer mon compte' }}
+      </button>
+    </div>
+  </section>
+
+  <footer class="footer">Copyright DataShare 2026</footer>
+</div>

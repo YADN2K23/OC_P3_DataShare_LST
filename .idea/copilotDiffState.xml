@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="$PROJECT_DIR$/.gitignore">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/.gitignore" />
+              <option name="originalContent" value="### IntelliJ IDEA ###&#10;out/&#10;!**/src/main/**/out/&#10;!**/src/test/**/out/&#10;.kotlin&#10;&#10;### Eclipse ###&#10;.apt_generated&#10;.classpath&#10;.factorypath&#10;.project&#10;.settings&#10;.springBeans&#10;.sts4-cache&#10;bin/&#10;!**/src/main/**/bin/&#10;!**/src/test/**/bin/&#10;&#10;### NetBeans ###&#10;/nbproject/private/&#10;/nbbuild/&#10;/dist/&#10;/nbdist/&#10;/.nb-gradle/&#10;&#10;### VS Code ###&#10;.vscode/&#10;&#10;### Mac OS ###&#10;.DS_Store" />
+              <option name="updatedContent" value="### IntelliJ IDEA ###&#10;out/&#10;!**/src/main/**/out/&#10;!**/src/test/**/out/&#10;.kotlin&#10;&#10;### Eclipse ###&#10;.apt_generated&#10;.classpath&#10;.factorypath&#10;.project&#10;.settings&#10;.springBeans&#10;.sts4-cache&#10;bin/&#10;!**/src/main/**/bin/&#10;!**/src/test/**/bin/&#10;&#10;### NetBeans ###&#10;/nbproject/private/&#10;/nbbuild/&#10;/dist/&#10;/nbdist/&#10;/.nb-gradle/&#10;&#10;### VS Code ###&#10;.vscode/&#10;&#10;### Mac OS ###&#10;.DS_Store&#10;&#10;### Java / Maven ###&#10;target/&#10;**/target/&#10;&#10;### Node / Angular ###&#10;node_modules/&#10;**/node_modules/&#10;dist/&#10;**/dist/&#10;coverage/&#10;**/coverage/&#10;test-results/&#10;**/test-results/&#10;playwright-report/&#10;**/playwright-report/&#10;.angular/&#10;**/.angular/" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

@@ -1,0 +1,29 @@
+<div class="page">
+  <nav class="nav">
+    <span class="logo">DataShare</span>
+    <button class="btn-nav" routerLink="/">Accueil</button>
+  </nav>
+
+  <section class="card-wrap">
+    <div class="card">
+      <h2>Connexion</h2>
+
+      @if (error) {
+        <div id="login-error" class="alert alert-error" role="alert" aria-live="assertive">{{ error }}</div>
+      }
+
+      <label for="email">Email</label>
+      <input id="email" type="email" placeholder="Saisissez votre email" [(ngModel)]="email" autocomplete="username" [attr.aria-invalid]="error ? 'true' : null" [attr.aria-describedby]="error ? 'login-error' : null" />
+
+      <label for="password">Mot de passe</label>
+      <input id="password" type="password" placeholder="Saisissez votre mot de passe" [(ngModel)]="password" autocomplete="current-password" [attr.aria-invalid]="error ? 'true' : null" [attr.aria-describedby]="error ? 'login-error' : null" />
+
+      <a class="link-btn" routerLink="/register">Creer un compte</a>
+      <button class="btn-main" [disabled]="isLoading" [attr.aria-busy]="isLoading" (click)="onLogin()">
+        {{ isLoading ? 'Connexion...' : 'Connexion' }}
+      </button>
+    </div>
+  </section>
+
+  <footer class="footer">Copyright DataShare 2026</footer>
+</div>

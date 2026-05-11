@@ -1,0 +1,59 @@
+<div class="page">
+  <nav class="nav">
+    <span class="logo">DataShare</span>
+    @if (isAuthenticated) {
+      <button class="btn-nav" routerLink="/my-space">Mon espace</button>
+    } @else {
+      <button class="btn-nav" routerLink="/login">Se connecter</button>
+    }
+  </nav>
+
+  <section class="card-wrap desktop-only">
+    <div class="card">
+      <h2>Ajouter un fichier</h2>
+      <div class="file-row file-row-plain">
+        <span class="file-icon">[F]</span>
+        <div class="file-info">
+          <div class="file-name">{{ fileName }}</div>
+          <div class="file-sub">{{ fileSizeLabel }}</div>
+        </div>
+      </div>
+
+      <p class="confirm-text">
+        Felicitations, ton fichier sera conserve chez nous pendant {{ expirationLabel }} !
+      </p>
+
+      <div class="share-link-box">
+        {{ shareUrl || 'Lien de partage indisponible' }}
+      </div>
+
+      <button class="btn-copy" [disabled]="!shareUrl" (click)="copyLink()">Copier le lien</button>
+    </div>
+  </section>
+
+  <section class="sheet-wrap mobile-only">
+    <div class="sheet">
+      <h2>Ajouter un fichier</h2>
+      <div class="file-row file-row-plain">
+        <span class="file-icon">[F]</span>
+        <div class="file-info">
+          <div class="file-name">{{ fileName }}</div>
+          <div class="file-sub">{{ fileSizeLabel }}</div>
+        </div>
+      </div>
+
+      <p class="confirm-text">
+        Felicitations, ton fichier sera conserve chez nous pendant {{ expirationLabel }} !
+      </p>
+
+      <div class="share-link-box">
+        {{ shareUrl || 'Lien de partage indisponible' }}
+      </div>
+
+      <button class="btn-main" [disabled]="!shareUrl" (click)="copyLink()">Copier le lien</button>
+    </div>
+  </section>
+
+  <footer class="footer desktop-only">Copyright DataShare 2026</footer>
+</div>
+
