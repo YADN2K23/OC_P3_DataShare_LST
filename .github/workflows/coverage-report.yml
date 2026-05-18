@@ -4,7 +4,7 @@ on:
   workflow_run:
     workflows: [ "Backend Tests & Coverage", "Frontend Tests & Coverage" ]
     types: [ completed ]
-    branches: [ develop, main ]
+    branches: [ develop, main, docs/harmonisation-v2 ]
 
 jobs:
   generate-badges:
@@ -42,13 +42,13 @@ jobs:
           FRONTEND_COVERAGE="N/A"
           
           # Extract backend coverage
-          if [ -f "backend-coverage/user-backend-app/target/site/jacoco/index.html" ]; then
-            BACKEND_COVERAGE=$(grep -oP 'Total</span>[^%]*\K[\d.]+(?=%)' "backend-coverage/user-backend-app/target/site/jacoco/index.html" | head -1 || echo "N/A")
+          if [ -f "backend-coverage/backend/user-backend-app/target/site/jacoco/index.html" ]; then
+            BACKEND_COVERAGE=$(grep -oP 'Total</span>[^%]*\K[\d.]+(?=%)' "backend-coverage/backend/user-backend-app/target/site/jacoco/index.html" | head -1 || echo "N/A")
           fi
           
           # Extract frontend coverage from coverage output
-          if [ -f "frontend-coverage/coverage-output.txt" ]; then
-            FRONTEND_COVERAGE=$(grep -oP 'Statements\s*:\s*\K[\d.]+(?=%)' "frontend-coverage/coverage-output.txt" | head -1 || echo "N/A")
+          if [ -f "frontend-coverage/frontend/webapp/coverage-output.txt" ]; then
+            FRONTEND_COVERAGE=$(grep -oP 'Statements\s*:\s*\K[\d.]+(?=%)' "frontend-coverage/frontend/webapp/coverage-output.txt" | head -1 || echo "N/A")
           fi
           
           echo "backend_coverage=$BACKEND_COVERAGE" >> $GITHUB_OUTPUT

@@ -3,10 +3,10 @@ name: Backend Tests & Coverage
 on:
   push:
     branches: [ main, develop ]
-    paths: [ 'datashare-backend/**', '.github/workflows/backend-test.yml' ]
+    paths: [ 'backend/**', '.github/workflows/backend-test.yml' ]
   pull_request:
     branches: [ main, develop ]
-    paths: [ 'datashare-backend/**' ]
+    paths: [ 'backend/**' ]
   workflow_dispatch:
 
 jobs:
@@ -40,7 +40,7 @@ jobs:
 
       - name: Run tests
         run: |
-          cd datashare-backend
+          cd backend
           mvn clean test -DskipITs=false
         env:
           DB_URL: jdbc:postgresql://localhost:5432/datashare_test
@@ -49,20 +49,20 @@ jobs:
 
       - name: Generate JaCoCo report
         run: |
-          cd datashare-backend
+          cd backend
           mvn jacoco:report
         if: always()
 
       - name: Check coverage threshold
         run: |
-          cd datashare-backend
+          cd backend
           mvn verify -Pjacoco-report
         if: always()
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
-          files: ./datashare-backend/user-backend-app/target/site/jacoco/jacoco.xml
+          files: ./backend/user-backend-app/target/site/jacoco/jacoco.xml
           flags: backend
           name: backend-coverage
         if: always()
@@ -72,8 +72,8 @@ jobs:
         with:
           name: backend-test-results
           path: |
-            datashare-backend/*/target/surefire-reports/
-            datashare-backend/*/target/site/jacoco/
+            backend/*/target/surefire-reports/
+            backend/*/target/site/jacoco/
         if: always()
 
       - name: Comment PR with coverage
@@ -82,7 +82,7 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const reportPath = './datashare-backend/user-backend-app/target/site/jacoco/index.html';
+            const reportPath = './backend/user-backend-app/target/site/jacoco/index.html';
             
             if (fs.existsSync(reportPath)) {
               const content = fs.readFileSync(reportPath, 'utf8');
@@ -115,10 +115,10 @@ jobs:
       - name: Build Docker image
         uses: docker/build-push-action@v4
         with:
-          context: ./datashare-backend
-          file: ./datashare-backend/Dockerfile
+          context: ./backend
+          file: ./backend/Dockerfile
           push: false
-          tags: datashare-backend:${{ github.sha }}
+          tags: backend:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
