@@ -32,6 +32,7 @@ bin/
 ### Java / Maven ###
 target/
 **/target/
+backend/.env
 
 ### Node / Angular ###
 node_modules/
