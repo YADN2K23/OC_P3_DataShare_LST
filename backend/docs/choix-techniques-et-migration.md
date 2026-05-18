@@ -20,22 +20,22 @@ Le choix du JWT est pertinent pour une plateforme de transfert de fichiers car :
 
 Le JWT est donc bien adapté à un MVP exposé à des investisseurs : il montre un socle d'authentification moderne et professionnel.
 
-### Stockage fichiers : disque local pour le MVP
+### Stockage fichiers : disque local pour les binaires
 Pour le prototype actuel, le stockage local est un choix pragmatique :
 - mise en place rapide,
 - peu de dépendances externes,
 - débogage simple,
 - suffisant pour démontrer upload, download, suppression et partage.
 
-Ce choix reste pertinent pour les binaires des fichiers, même si la persistance métier a été déplacée en base PostgreSQL via Flyway.
+Ce choix reste pertinent pour les binaires des fichiers, tandis que la persistance métier des métadonnées est assurée par PostgreSQL via Flyway/JPA.
 
-### Persistance métier : base de données relationnelle comme **cible documentée**
-L'énoncé demande un MCD, ce qui implique une modélisation relationnelle pour les données métier. Cette cible est **documentée mais pas encore entièrement implémentée** au cœur du prototype. Le modèle visé comprend :
+### Persistance métier : base de données relationnelle comme **réalité du prototype v2**
+L'énoncé demande un MCD, ce qui implique une modélisation relationnelle pour les données métier. Cette cible est **désormais implémentée pour les métadonnées métier**. Le modèle comprend :
 - `User`
 - `FileAsset`
 - `ShareLink`
 
-**Status actuel** : Le schéma SQL existe (créé par Flyway), mais les métadonnées de fichiers sont toujours stockées en fichiers `.properties` locaux (voir `docs/data-model.md`).
+**Status actuel** : Le schéma SQL existe (créé par Flyway) et les métadonnées de fichiers sont persistées en PostgreSQL (voir `docs/data-model.md`).
 
 La base relationnelle restera le bon choix pour :
 - garantir l'intégrité référentielle,
@@ -66,7 +66,7 @@ Le prototype actuel fonctionne avec :
 - un backend Spring Boot,
 - des fichiers stockés sur disque,
 - des **comptes utilisateur persistés en PostgreSQL via Flyway** ✅,
-- des **métadonnées de fichiers et tokens de partage stockés localement en fichiers `.properties`** (pas encore migrés vers ORM),
+- des **métadonnées de fichiers et tokens de partage stockés en PostgreSQL via ORM**, 
 - un `compose.yaml` pour lancer PostgreSQL et l'application,
 - un stockage binaire local/volumique.
 
@@ -76,7 +76,7 @@ La cible la plus cohérente avec le MCD est (et demeure) :
 - un stockage disque ou volume Docker pour les fichiers binaires,
 - une application backend containerisée.
 
-Cette cible est **partiellement amorcée** dans le projet livré (comptes en base), avec la **migration des métadonnées de fichiers en priorité** pour l'étape suivante.
+Cette cible est **en place dans le projet livré** (comptes et métadonnées en base), avec le stockage binaire conservé sur disque/volume.
 
 ### Étape 1 — Introduire la base de données
 **Objectif** : préparer la persistance métier.
@@ -105,10 +105,10 @@ Relations :
 - un fichier possède plusieurs liens de partage,
 - un lien appartient à un seul fichier.
 
-### Étape 3 — Migrer les métadonnées hors du disque [À FAIRE - ÉTAPE PRIORITAIRE]
-**Objectif** : remplacer les fichiers `.properties` par la persistance relationnelle.
+### Étape 3 — Migrer les métadonnées hors du disque [RÉALISÉE]
+**Objectif historique** : remplacer les fichiers `.properties` par la persistance relationnelle.
 
-**Status** : Les tables et migrations Flyway existent, mais l'implémentation du service `FileStorageService` ne les utilise pas encore. Les métadonnées sont toujours lues/écrites en `.properties`.
+**Status** : Les tables et migrations Flyway existent et l'implémentation du service `FileStorageService` s'appuie désormais sur elles pour les métadonnées.
 
 Actions :
 - faire porter par la base le propriétaire du fichier,
@@ -125,7 +125,7 @@ Actions :
 - `createShareLink(...)` crée une ligne `share_links`,
 - `deleteOwnedFile(...)` supprime le fichier et invalide les liens associés.
 
-> Les endpoints d'authentification lisent déjà la base PostgreSQL; les entités métier peuvent être migrées progressivement au même rythme.
+> Les endpoints d'authentification et les services métier lisent déjà la base PostgreSQL.
 
 ### Étape 5 — Dockeriser l'environnement
 **Objectif** : rendre le projet reproductible.
@@ -158,9 +158,9 @@ Actions :
 ## Priorité recommandée
 
 ### Priorité haute
-1. Base de données relationnelle
-2. Migration des métadonnées
-3. Tests d'intégration BDD
+1. Consolidation des tests d'intégration BDD
+2. Observabilité et audit
+3. Durcissement sécurité/performance
 
 ### Priorité moyenne
 4. Dockerisation du backend
@@ -176,7 +176,7 @@ Actions :
 
 La meilleure trajectoire est de conserver le prototype actuel comme preuve fonctionnelle, puis d'élever progressivement la persistance métier vers une base relationnelle complète.
 
-**Étape prioritaire immédiate** : Migrer les métadonnées de fichiers (actuellement en `.properties`) vers PostgreSQL et l'ORM Spring Data JPA.
+**Étape prioritaire immédiate** : Consolider les tests et les documents autour du socle PostgreSQL déjà en place.
 
 Cela permet de :
 - répondre à l'énoncé (MCD documenté et implémenté),

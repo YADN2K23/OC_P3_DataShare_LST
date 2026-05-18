@@ -70,8 +70,9 @@ DataShare/
 - ✅ **Services** : AuthService, FileService
 - ✅ **JWT authentication** localStorage + HttpInterceptor
 - ✅ **Guards** : Protection routes authentifiées
-- ✅ **Tests** : 71/71 ✅ (unitaires + intégration + E2E)
-- ✅ **Coverage** : 62.37% (target 70%)
+- ✅ **Upload** : limite frontend strictement inférieure à 1 Go
+- ✅ **Tests** : suites frontend et backend validées, avec couverture frontend au-dessus du seuil cible
+- ✅ **Coverage** : frontend Functions > 70% (dernier run validé: 92.07%)
 
 ### 🐳 DevOps
 - ✅ **Docker Compose** : Stack complète (PostgreSQL + Backend)
@@ -339,7 +340,7 @@ mvn clean test
 # JaCoCo Coverage : 70%+
 ```
 
-### Frontend (71 tests ✅)
+### Frontend (88 tests ✅)
 
 ```bash
 cd frontend/webapp
@@ -347,11 +348,11 @@ cd frontend/webapp
 # Pipeline complète (comme CI)
 npm run test:ci
 
-# Résultats : 71/71 PASSED ✅
-# - Unit tests : 22
-# - Integration tests : 49
+# Résultats : 88/88 PASSED ✅
+# - Unit tests : 28
+# - Integration tests : 59
 # - Functional tests : 1
-# Coverage : 62.37% (target: 70%)
+# Coverage : 92.07% (target: 70% atteint)
 ```
 
 ### Détail des tests

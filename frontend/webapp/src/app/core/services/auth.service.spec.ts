@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 
 import { AuthService } from './auth.service';
 
@@ -91,5 +92,45 @@ describe('AuthService', () => {
     expect(req.request.method).toBe('GET');
     req.flush({ login: 'john@doe.fr' });
   });
-});
 
+  // === PHASE 1: Edge cases ===
+
+  it('gere les erreurs de réseau lors du login', (done) => {
+    service.login('user@test.com', 'password').subscribe({
+      next: () => fail('Should have errored'),
+      error: (err) => {
+        expect(err).toBeDefined();
+        done();
+      }
+    });
+
+    const req = httpMock.expectOne('http://localhost:8080/api/login');
+    req.error(new ErrorEvent('Network error'));
+  });
+
+  it('ensureAuthenticated cleare le token en cas d\'erreur refresh', (done) => {
+    service.ensureAuthenticated().subscribe((isAuthenticated) => {
+      expect(isAuthenticated).toBeFalse();
+      expect(service.getToken()).toBeNull();
+      expect(service.hasToken()).toBeFalse();
+      done();
+    });
+
+    const req = httpMock.expectOne('http://localhost:8080/api/refresh');
+    req.error(new ProgressEvent('error'));
+  });
+
+  it('gere les reponses invalides du serveur (500 error)', (done) => {
+    service.login('user@test.com', 'password').subscribe({
+      next: () => fail('Should have errored'),
+      error: (err: HttpErrorResponse) => {
+        expect(err.status).toBe(500);
+        expect(err.statusText).toBe('Server Error');
+        done();
+      }
+    });
+
+    const req = httpMock.expectOne('http://localhost:8080/api/login');
+    req.flush('Server error', { status: 500, statusText: 'Server Error' });
+  });
+});

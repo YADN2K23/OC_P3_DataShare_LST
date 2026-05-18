@@ -30,11 +30,27 @@
   "token": "eyJhbGciOiJIUzI1NiJ9.eyJsb2dpbiI6ImRlbW8iLCJleHAiOjE2MjU4NzY5NzZ9...."
 }
 ```
+- **Effet de bord** : un cookie `refresh_token` HttpOnly est aussi posé par le backend pour le renouvellement du JWT.
 - **Codes d'erreur** :
   - `401` : Identifiants invalides
   - `429` : Trop de tentatives (rate limiting)
 
-#### 2. **POST /api/register**
+#### 2. **POST /api/refresh**
+- **Résumé** : Renouveler le JWT d'accès à partir du cookie `refresh_token`
+- **Authentification** : aucun header Bearer requis, mais le cookie `refresh_token` doit être présent.
+- **Cookie attendu** : `refresh_token` (HttpOnly, `SameSite=Lax`, `Path=/api`; le drapeau `Secure` dépend de la configuration)
+- **Réponse (200)** : nouveau JWT d'accès + cookie `refresh_token` renouvelé
+- **Codes d'erreur** :
+  - `401` : Cookie de refresh absent, invalide ou expiré
+
+#### 3. **POST /api/logout**
+- **Résumé** : Révoquer le refresh token et effacer le cookie associé
+- **Authentification** : aucun header Bearer requis, mais le cookie `refresh_token` peut être utilisé pour la révocation
+- **Réponse (204)** : déconnexion réussie, cookie `refresh_token` vidé
+- **Codes d'erreur** :
+  - `401` : Cookie de refresh absent, invalide ou déjà révoqué
+
+#### 4. **POST /api/register**
 - **Résumé** : Créer un nouveau compte utilisateur
 - **Corps (JSON)** :
 ```json
@@ -52,7 +68,7 @@
 
 ### 👤 Utilisateur (Protégé - Nécessite JWT)
 
-#### 3. **GET /api/me**
+#### 5. **GET /api/me**
 - **Résumé** : Obtenir les informations de l'utilisateur authentifié
 - **Header requis** : `Authorization: Bearer <JWT_TOKEN>`
 - **Réponse (200)** :
@@ -68,7 +84,7 @@
 
 ### 📁 Fichiers (Protégé - Nécessite JWT)
 
-#### 4. **GET /api/files** (Pagination)
+#### 6. **GET /api/files** (Pagination)
 - **Résumé** : Lister les fichiers de l'utilisateur
 - **Header requis** : `Authorization: Bearer <JWT_TOKEN>`
 - **Paramètres** :
@@ -94,7 +110,7 @@
 }
 ```
 
-#### 5. **POST /api/files** (Upload)
+#### 7. **POST /api/files** (Upload)
 - **Résumé** : Uploader un fichier
 - **Header requis** : `Authorization: Bearer <JWT_TOKEN>`
 - **Content-Type** : `multipart/form-data`
@@ -116,7 +132,7 @@
   - `415` : Type de fichier non autorisé
   - `507` : Quota de stockage dépassé
 
-#### 6. **GET /api/files/{storedFileName}** (Download)
+#### 8. **GET /api/files/{storedFileName}** (Download)
 - **Résumé** : Télécharger un fichier propriétaire
 - **Header requis** : `Authorization: Bearer <JWT_TOKEN>`
 - **Réponse (200)** : Contenu binaire du fichier
@@ -124,7 +140,7 @@
   - `403` : Accès refusé
   - `404` : Fichier non trouvé
 
-#### 7. **DELETE /api/files/{storedFileName}**
+#### 9. **DELETE /api/files/{storedFileName}**
 - **Résumé** : Supprimer un fichier
 - **Header requis** : `Authorization: Bearer <JWT_TOKEN>`
 - **Réponse (204)** : Fichier supprimé (pas de contenu)
@@ -132,7 +148,7 @@
   - `403` : Accès refusé
   - `404` : Fichier non trouvé
 
-#### 8. **GET /api/files/history** (Pagination)
+#### 10. **GET /api/files/history** (Pagination)
 - **Résumé** : Historique des actions sur les fichiers
 - **Header requis** : `Authorization: Bearer <JWT_TOKEN>`
 - **Paramètres** :
@@ -160,7 +176,7 @@
 
 ### 🔗 Partage de Fichiers
 
-#### 9. **POST /api/files/{storedFileName}/shares** (Créer lien)
+#### 11. **POST /api/files/{storedFileName}/shares** (Créer lien)
 - **Résumé** : Créer un lien de partage public
 - **Header requis** : `Authorization: Bearer <JWT_TOKEN>`
 - **Paramètres** :
@@ -175,7 +191,7 @@
 }
 ```
 
-#### 10. **GET /api/files/shared/{token}** (Download Public)
+#### 12. **GET /api/files/shared/{token}** (Download Public)
 - **Résumé** : Télécharger via un lien de partage public (SANS authentification)
 - **Réponse (200)** : Contenu binaire du fichier
 - **Codes d'erreur** :
@@ -272,7 +288,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJsb2dpbiI6ImRlbW8i...
 ## 🔍 OpenAPI / Swagger
 
 **Location des fichiers** :
-- `datashare-backend/docs/openapi.yaml` - Spécification OpenAPI
+- `openapi.yaml` - Spécification OpenAPI
 - `http://localhost:8080/swagger-ui.html` - Interface Swagger UI
 - `http://localhost:8080/v3/api-docs` - JSON OpenAPI (auto-généré)
 
@@ -282,6 +298,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJsb2dpbiI6ImRlbW8i...
 
 - **Authentification JWT** : Expiration par défaut = 24h
 - **Rate limiting** : 5 tentatives de login échouées → blockage
+- **Refresh token** : cookie `HttpOnly` géré par le backend, `SameSite=Lax`, `Path=/api`
 - **Taille fichier** : Max 1 GB par fichier
 - **Type fichier** : text/plain, image/png, image/jpeg, application/pdf
 - **Quota** : 1 GB par utilisateur

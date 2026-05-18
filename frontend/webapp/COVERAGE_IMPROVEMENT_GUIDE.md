@@ -1,13 +1,15 @@
 # Guide d'Amélioration de la Couverture de Tests
 
 ## Vue d'ensemble
-Couverture actuelle : **62.37% (Functions)**  
+Couverture actuelle : **92.07% (Functions, integration)**  
 Objectif : **70%+**  
-Gap : **7.63pp**
+Statut : **atteint** ✅
 
 ## Fichiers Prioritaires à Améliorer
 
 ### 1. Services Edge Cases
+
+La plupart des cas de bord services sont désormais couverts via `src/app/pages/service-coverage.spec.ts`.
 
 #### auth.service.ts
 **Couverture actuelle**: 86%
@@ -279,10 +281,10 @@ Ajouter les edge cases Composants:
 - **Objectif** : +8 tests → Couverture Functions: ~68%
 
 ### Phase 3 (1 jour)
-Ajouter les tests crosscut (sécurité, perf):
+Ajouter les tests crosscut (sécurité, perf) si un durcissement supplémentaire est souhaité:
 - ❌ Nouveau: security.spec.ts : +3 tests
 - ❌ Nouveau: performance.spec.ts : +2 tests
-- **Objectif** : +5 tests → Couverture Functions: **70%+** ✅
+- **Objectif** : durcissement additionnel, sans contrainte de seuil immédiate
 
 ## Commandes Utiles
 

@@ -44,7 +44,8 @@ DataShare est une **plateforme de transfert de fichiers sécurisée** composée 
 ┌────────────────────────▼────────────────────────────────────────┐
 │     POSTGRESQL 16 + STOCKAGE FICHIERS (modèle cible documenté)  │
 │  - Modèle relationnel : users, file_assets, share_links (docs)  │
-│  - Implémentation actuelle : métadonnées en fichiers locaux     │
+│  - Implémentation actuelle : PostgreSQL source de vérité des    │
+│    métadonnées ; le disque conserve uniquement les binaires     │
 │  - Binaires des fichiers : volume Docker persistant             │
 │             localhost:5432                                      │
 └─────────────────────────────────────────────────────────────────┘
@@ -58,7 +59,7 @@ DataShare est une **plateforme de transfert de fichiers sécurisée** composée 
   - `/` : Landing page (public)
   - `/login` : Authentification
   - `/register` : Création de compte
-  - `/upload` : Téléversement de fichiers (protégé)
+  - `/upload` : Téléversement de fichiers (protégé, limite frontend strictement < 1 Go)
   - `/my-space` : Espace utilisateur (protégé)
   - `/download` : Téléchargement de fichiers partagés
 - **Services** :
@@ -81,12 +82,13 @@ DataShare est une **plateforme de transfert de fichiers sécurisée** composée 
 - Endpoints de partage (`POST /api/files/{id}/shares`, `GET /api/files/shared/{token}`)
 - Persistance PostgreSQL via Spring Data JPA
 - Migrations de schéma via Flyway
+- Validation multipart côté serveur avec plafond configuré à 1 Go (`spring.servlet.multipart.max-file-size` / `max-request-size`)
 
 #### **Base de données PostgreSQL 16**
-- **Modèle cible documenté** : Entités `users`, `file_assets`, `share_links` (schéma relationnel complet)
-- **Implémentation actuelle** : Métadonnées fichiers stockées localement en `.properties`; structure SQL disponible mais métadonnées métier non encore entièrement migrées vers la persistance ORM
+- **Modèle documenté et implémenté** : Entités `users`, `file_assets`, `share_links` (schéma relationnel complet)
+- **Implémentation actuelle** : PostgreSQL est la source de vérité des métadonnées métier ; les binaires restent sur volume Docker
 - Migrations versionnées via Flyway
-- Voir `docs/data-model.md` pour la distinction détaillée
+- Voir `backend/docs/data-model.md` pour le détail du modèle
 
 #### **Stockage fichiers**
 - Volume Docker pour persistance entre redémarrages
@@ -95,7 +97,7 @@ DataShare est une **plateforme de transfert de fichiers sécurisée** composée 
 ### Architecture techniques
 
 **Diagrammes disponibles** :
-- `datashare-backend/docs/architecture.md` : architecture modulaire backend
+- `backend/docs/architecture.md` : architecture modulaire backend
 - `Schémas d'architecture/01_architecture_globale.svg` : vue d'ensemble
 - `Schémas d'architecture/html-alignes/01_architecture_globale.html` : version interactive
 
@@ -166,7 +168,7 @@ PostgreSQL est choisi pour :
 
 La section suivante décrit le **modèle de données cible** pour une persistance relationnelle propre. C'est la structure recommandée mais **pas l'implémentation actuellement livrée** du prototype.
 
-**Status actuel du prototype** : Les métadonnées de fichiers sont stockées localement en fichiers `.properties` (voir `datashare-backend/docs/data-model.md` pour la distinction détaillée).
+**Status actuel du prototype** : Les métadonnées de fichiers sont persistées dans PostgreSQL via JPA ; le stockage local concerne uniquement les binaires. Voir `backend/docs/data-model.md`.
 
 ### MCD (Modèle Conceptuel de Données)
 
@@ -238,7 +240,7 @@ CREATE INDEX idx_share_links_token ON share_links(token);
 
 ### Migrations Flyway
 
-Fichiers versionnés dans `datashare-backend/src/main/resources/db/migration/` :
+Fichiers versionnés dans `backend/src/main/resources/db/migration/` :
 - `V1__init_schema.sql` : création des tables
 - `V2__add_indexes.sql` : optimisation requêtes
 
@@ -248,7 +250,7 @@ Fichiers versionnés dans `datashare-backend/src/main/resources/db/migration/` :
 
 ### Spécification OpenAPI
 
-La spécification complète est disponible dans : **`datashare-backend/docs/openapi.yaml`**
+La spécification complète est disponible dans : **`backend/docs/openapi.yaml`**
 
 Pour visualiser interactivement : utiliser **Swagger UI** ou **Redoc** en pointant sur le fichier YAML.
 
@@ -334,7 +336,7 @@ curl http://localhost:8080/api/files/shared/abc123def456... -o document.pdf
 
 ## 5. Sécurité et gestion des accès
 
-*Voir document complet : `datashare-backend/SECURITY.md`*
+*Voir document complet : `backend/SECURITY.md`*
 
 ### Authentification
 
@@ -364,7 +366,7 @@ curl http://localhost:8080/api/files/shared/abc123def456... -o document.pdf
 #### **Validation**
 - ✅ Validation des entrées (email, taille fichier, etc.)
 - ✅ Vérification du type MIME avant upload
-- ✅ Limite de taille fichier (configurable)
+- ✅ Limite frontend strictement < 1 Go et limite backend multipart à 1 Go
 - ✅ Limite de quota utilisateur
 
 #### **Session**
@@ -523,7 +525,7 @@ mvn -f pom.xml clean verify  # Génère rapport JaCoCo
 
 ### Performance
 
-*Voir document complet : `datashare-backend/PERF.md`*
+*Voir document complet : `backend/PERF.md`*
 
 #### **Endpoint critique**
 
@@ -544,11 +546,11 @@ Actuellement : `POST /api/login`
 k6 run perf/load-test-login.js --vus 20 --duration 1m
 ```
 
-Script exemple disponible dans `datashare-backend/PERF.md`
+Script exemple disponible dans `backend/PERF.md`
 
 ### Maintenance
 
-*Voir document complet : `datashare-backend/MAINTENANCE.md`*
+*Voir document complet : `backend/MAINTENANCE.md`*
 
 #### **Routine recommandée**
 
@@ -667,7 +669,7 @@ npx playwright install chromium  # Pour tests E2E
 
 ```bash
 # Depuis racine DataShare
-docker compose -f datashare-backend/compose.yaml up --build
+docker compose -f backend/compose.yaml up --build
 ```
 
 Cela lance :
@@ -743,7 +745,7 @@ export const environment = {
 };
 ```
 
-**Backend** (`datashare-backend/user-backend-app/src/main/resources/application.yml`) :
+**Backend** (`backend/user-backend-app/src/main/resources/application.yml`) :
 
 ```yaml
 # Dev
@@ -851,7 +853,7 @@ npm run docker:build
 npm run docker:run
 
 # Backend (inclus dans compose.yaml)
-docker compose -f datashare-backend/compose.yaml up --build
+docker compose -f backend/compose.yaml up --build
 ```
 
 ### Troubleshooting

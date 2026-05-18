@@ -194,5 +194,54 @@ describe('FileService', () => {
     expect(merged[0].passwordProtected).toBeFalse();
     expect(merged[0].expiresAt).toBeUndefined();
   });
-});
 
+  // === PHASE 1: Edge cases ===
+
+  it('encode les noms de fichiers avec caractères spéciaux', () => {
+    service.downloadFile('file%20with%20spaces.pdf').subscribe();
+
+    const req = httpMock.expectOne(
+      'http://localhost:8080/api/files/file%2520with%2520spaces.pdf'
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush(new Blob(['content']));
+  });
+
+  it('valide le format de la response pagination', () => {
+    service.listFiles().subscribe((files) => {
+      expect(files).toBeInstanceOf(Array);
+      files.forEach((f) => {
+        expect(f.storedFileName).toBeDefined();
+        expect(f.originalFileName).toBeDefined();
+        expect(f.contentType).toBeDefined();
+        expect(f.size).toBeDefined();
+      });
+    });
+
+    const req = httpMock.expectOne('http://localhost:8080/api/files');
+    req.flush({
+      content: [
+        {
+          storedFileName: 'file.txt',
+          originalFileName: 'file.txt',
+          size: 100,
+          contentType: 'text/plain',
+          createdAt: '2026-05-10T00:00:00Z',
+          passwordProtected: false,
+        },
+      ],
+      totalElements: 1,
+      totalPages: 1,
+      number: 0,
+      size: 20,
+    });
+  });
+
+  it('gere les erreurs lors du cache des préférences', () => {
+    spyOn(localStorage, 'setItem').and.throwError('QuotaExceededError');
+
+    expect(() => {
+      service.cacheUploadPreferences('file.txt', true);
+    }).toThrowError('QuotaExceededError');
+  });
+});

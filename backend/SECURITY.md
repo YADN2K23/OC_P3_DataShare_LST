@@ -35,7 +35,7 @@ Fichier concerne: `user-backend-app/src/main/resources/application.yml`
 - Ne pas commiter de secret de production en clair.
 - Utiliser des variables d'environnement pour les secrets hors environnement local.
 - Conserver des secrets differents par environnement (dev/test/prod).
-- Fournir les secrets Docker via `datashare-backend/.env` local non commite ou via le gestionnaire de secrets de l'environnement cible.
+- Fournir les secrets Docker via `backend/.env` local non commite ou via le gestionnaire de secrets de l'environnement cible.
 
 Variables d'environnement attendues:
 
@@ -76,14 +76,16 @@ Variables d'environnement attendues:
 
 ## Strategie XSS / JWT
 
-Le front conserve un access token JWT cote navigateur pour le MVP. La mitigation minimale appliquee est:
+Le front conserve un access token JWT cote navigateur pour le MVP. La mitigation appliquee actuellement est:
 
 - CSP stricte dans `datashare-frontend/webapp/nginx.conf`.
 - Absence de scripts tiers et restriction `object-src 'none'`, `frame-ancestors 'none'`.
 - Donnees utilisateur affichees via interpolation Angular, pas via injection HTML.
 - Duree de vie courte du token configurable par `JWT_EXPIRATION_MILLIS`.
+- Refresh token stocke cote navigateur en cookie `HttpOnly`, `Secure` si active par configuration, `SameSite=Lax`, `Path=/api`.
+- Le JWT d'acces reste transmis dans le corps de reponse et le refresh token n'est pas expose au JavaScript.
 
-Evolution recommandee pour production: basculer le refresh token en cookie `HttpOnly`, `Secure`, `SameSite=Strict`, garder l'access token en memoire et supprimer la persistance durable du token.
+Evolution recommandee pour production: renforcer encore la strategie de stockage de l'access token cote client (memoire uniquement) et evaluer `SameSite=Strict` selon les contraintes d'usage.
 
 ## Journalisation securite
 
@@ -135,7 +137,7 @@ mvn -B -ntp -f pom.xml org.owasp:dependency-check-maven:12.1.0:check -Dformat=HT
 
 1. Mettre en place `kid` + validation multi-cle pour permettre la rotation progressive du `JWT_SECRET`.
 2. Remplacer le rate limiting en memoire par Bucket4j/Redis ou par un rate limiter ingress.
-3. Migrer la strategie JWT vers refresh token en cookie `HttpOnly` et access token en memoire.
+3. Faire evoluer la strategie JWT vers access token en memoire uniquement si le contexte produit le permet.
 4. Activer un secret scanning automatique et definir une procedure de rotation des secrets.
 
 

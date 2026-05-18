@@ -2,7 +2,7 @@
 
 ## Référence de gouvernance
 
-Avant toute contribution, lire d'abord `PROJECT_GOVERNANCE.md`.
+Avant toute contribution, lire d'abord la documentation racine et les guides de versionnement présents dans le dépôt.
 
 Ce fichier définit la source de vérité du projet, les règles de branchement, l'ordre de mise à jour et la logique de suivi.
 
@@ -16,8 +16,8 @@ Ce dépôt parent doit rester centré sur:
 
 Le code applicatif se modifie dans:
 
-- `datashare-backend`
-- `datashare-frontend`
+- `backend`
+- `frontend`
 
 ## Branching
 
@@ -56,5 +56,5 @@ Avant merge:
 1. Le commit du submodule est poussé sur son remote.
 2. Le parent référence bien ce commit.
 3. `git submodule status` ne montre pas d'état incohérent.
-4. La documentation et `PROJECT_STATUS.json` sont alignés si le changement touche le suivi.
+4. La documentation et les notes de suivi du projet sont alignées si le changement touche le suivi.
 
