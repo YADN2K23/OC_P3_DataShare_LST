@@ -142,7 +142,7 @@ docker exec datashare-postgres psql -U datashare -d datashare `
 
 ## Critère de sortie de maintenance par release
 
-- ✅ Tests `clean test` passent (backend: 44/44, frontend: 71/71)
+- ✅ Tests `clean test` passent (backend: 44/44, frontend: 88/88)
 - ✅ Aucun incident bloquant ouvert
 - ✅ Documentation d'exploitation synchronisée avec le code livré
 

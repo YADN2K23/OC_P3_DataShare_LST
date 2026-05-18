@@ -5,8 +5,8 @@
 Le prototype couvre le socle d'authentification JWT et le cycle fichier (upload, download, partage, suppression).
 
 Le present document distingue :
-- le **modele logique cible** pour une base de donnees relationnelle, documente mais pas encore implemente comme modele metier principal,
-- et l'**implementation actuelle** du prototype, qui stocke encore les metadonnees localement sur disque.
+- le **modele logique cible** pour une base de donnees relationnelle,
+- et l'**implementation actuelle** du prototype, qui persiste les metadonnees métier dans PostgreSQL tandis que les binaires restent sur disque.
 
 ## Donnees techniques actuelles
 
@@ -27,7 +27,7 @@ Generees par `JwtService`:
 - `iat` : date d'emission
 - `exp` : date d'expiration
 
-## MCD cible
+## MCD
 
 Le modele cible pour la persistance metier est compose de 3 entites : `User`, `FileAsset` et `ShareLink`.
 
@@ -105,7 +105,7 @@ Represente un lien de partage temporaire associe a un fichier.
 
 ## Tables relationnelles conseillees
 
-Si le prototype est aligne sur ce MCD, la base relationnelle doit contenir :
+La base relationnelle contient :
 
 ### `users`
 
@@ -136,5 +136,5 @@ Si le prototype est aligne sur ce MCD, la base relationnelle doit contenir :
 
 Ce document complete `docs/architecture.md` et le contrat `docs/openapi.yaml`.
 
-Dans l'etat actuel du prototype, les fichiers sont stockes localement et les metadonnees sont persistées sous forme de fichiers internes. Le MCD ci-dessus represente le **modele cible documente** attendu pour une persistance relationnelle propre, et non le modele encore implemente au coeur du prototype.
+Dans l'etat actuel du prototype, les binaires des fichiers sont stockes localement et les metadonnees sont persistées dans PostgreSQL. Le MCD ci-dessus represente le **modele en vigueur** pour la persistance relationnelle du coeur métier.
 

@@ -1,17 +1,17 @@
-# DataShare Frontend - Test Summary (2026-05-10)
+# DataShare Frontend - Test Summary (2026-05-13)
 
 ## ✅ Test Status
 
 ### Test Execution Results
-- **Total Tests**: 71 tests
-- **Passed**: 71 ✅ (100%)
+- **Total Tests**: 88 tests (Karma)
+- **Passed**: 88 ✅ (100%)
 - **Failed**: 0 ❌
-- **Coverage**: 62.37% (Functions)
+- **Coverage**: 92.07% (Functions, integration)
 
 ### Test Breakdown by Category
 
-#### 1. Unit Tests (22 tests) ✅
-**Coverage: 86.36% Functions**
+#### 1. Unit Tests (28 tests) ✅
+**Coverage: 90.9% Functions**
 - `auth.service.spec.ts` (6 tests)
   - ✅ Register POST request handling
   - ✅ Login token storage
@@ -40,8 +40,8 @@
   - ✅ Skip header if no token
   - ✅ Retry on 401 after refresh
 
-#### 2. Integration Tests (49 tests) ✅
-**Coverage: 62.37% Functions (total with e2e)**
+#### 2. Integration Tests (59 tests) ✅
+**Coverage: 92.07% Functions**
 
 **Page Components:**
 
@@ -97,6 +97,10 @@
   - ✅ Handle invalid token
   - ✅ Document generation
 
+- `service-coverage.spec.ts` (2 tests)
+  - ✅ Cross-cutting AuthService paths
+  - ✅ Cross-cutting FileService paths
+
 - `home-logged.spec.ts` & `upload-confirm.spec.ts` (8 tests)
   - ✅ Navigation flows
   - ✅ File metadata display
@@ -119,15 +123,15 @@
 ```typescript
 // BEFORE
 component.files = [
-  { ...file..., expiresAt: '2026-04-18T00:00:00Z' }, // past
-  { ...file..., expiresAt: '2026-04-16T00:00:00Z' }  // past
+  { storedFileName: 'a', originalFileName: 'a.txt', contentType: 'text/plain', size: 1, createdAt: '2026-05-01T00:00:00Z', expiresAt: '2026-04-18T00:00:00Z' },
+  { storedFileName: 'b', originalFileName: 'b.txt', contentType: 'text/plain', size: 1, createdAt: '2026-05-01T00:00:00Z', expiresAt: '2026-04-16T00:00:00Z' }
 ];
 
 // AFTER
 spyOn(Date, 'now').and.returnValue(new Date('2026-05-10T00:00:00Z').getTime());
 component.files = [
-  { ...file..., expiresAt: '2026-05-20T00:00:00Z' }, // future - active
-  { ...file..., expiresAt: '2026-05-08T00:00:00Z' }  // past - expired
+  { storedFileName: 'a', originalFileName: 'a.txt', contentType: 'text/plain', size: 1, createdAt: '2026-05-01T00:00:00Z', expiresAt: '2026-05-20T00:00:00Z' },
+  { storedFileName: 'b', originalFileName: 'b.txt', contentType: 'text/plain', size: 1, createdAt: '2026-05-01T00:00:00Z', expiresAt: '2026-05-08T00:00:00Z' }
 ];
 ```
 
@@ -138,11 +142,11 @@ component.files = [
 |--------|----------|--------|
 | Statements | 75.49% | ⚠️ Below target |
 | Branches | 76.1% | ⚠️ Below target |  
-| Functions | 62.37% | ❌ **Below 70% threshold** |
+| Functions | 92.07% | ✅ **Above 70% threshold** |
 | Lines | 75.85% | ⚠️ Below target |
 
 ### Coverage Issues
-Functions coverage is **62.37%** vs threshold of **70%**.
+Functions coverage is **92.07%** vs threshold of **70%**.
 
 **Missing coverage in**:
 - Some error handling branches
@@ -198,7 +202,8 @@ npm run test:e2e          # End-to-end Playwright tests
 
 ## ✨ Files Modified
 
-- `datashare-frontend/webapp/src/app/pages/my-space/my-space.spec.ts` - Fixed filter date test
+- `frontend/webapp/src/app/pages/my-space/my-space.spec.ts` - Fixed filter date test
+- `frontend/webapp/src/app/pages/service-coverage.spec.ts` - Added cross-cutting service coverage
 
 ## 📋 Next Steps
 

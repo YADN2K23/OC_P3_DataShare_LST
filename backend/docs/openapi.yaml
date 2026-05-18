@@ -27,7 +27,37 @@ paths:
         '401':
           description: Identifiants invalides
         '429':
-          description: Trop de tentatives de connexion
+          $ref: '#/components/responses/TooManyRequests'
+  /api/refresh:
+    post:
+      summary: Renouvelle le JWT d'accès a partir du cookie de refresh
+      parameters:
+        - $ref: '#/components/parameters/RefreshTokenCookie'
+      responses:
+        '200':
+          description: JWT d'accès renouvelle
+          headers:
+            Set-Cookie:
+              $ref: '#/components/headers/RefreshTokenSetCookie'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Cookie de refresh absent, invalide ou expire
+  /api/logout:
+    post:
+      summary: Revoque le refresh token et efface le cookie associe
+      parameters:
+        - $ref: '#/components/parameters/RefreshTokenCookie'
+      responses:
+        '204':
+          description: Deconnexion reussie, cookie refresh_token efface
+          headers:
+            Set-Cookie:
+              $ref: '#/components/headers/RefreshTokenClearCookie'
+        '401':
+          description: Cookie de refresh absent, invalide ou deja revoque
   /api/register:
     post:
       summary: Cree un compte utilisateur
@@ -254,6 +284,26 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+  parameters:
+    RefreshTokenCookie:
+      in: cookie
+      name: refresh_token
+      required: false
+      description: Cookie HttpOnly contenant le refresh token, avec SameSite=Lax et path=/api.
+      schema:
+        type: string
+  headers:
+    RefreshTokenSetCookie:
+      description: Nouveau cookie `refresh_token` HttpOnly, avec SameSite=Lax, path=/api et expiration de 30 jours.
+      schema:
+        type: string
+    RefreshTokenClearCookie:
+      description: Cookie `refresh_token` vide, HttpOnly, avec SameSite=Lax, path=/api et expiration immediate.
+      schema:
+        type: string
+  responses:
+    TooManyRequests:
+      description: Trop de tentatives de connexion
   schemas:
     LoginRequest:
       type: object

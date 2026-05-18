@@ -1,0 +1,60 @@
+name: Maven CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  schedule:
+    - cron: "0 2 * * *"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Build and test monorepo
+        run: mvn -B -ntp -f pom.xml clean verify
+
+  cve-scan:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'schedule'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Scan CVE (OWASP Dependency-Check)
+        run: >-
+          mvn -B -ntp -f pom.xml
+          org.owasp:dependency-check-maven:12.1.0:check
+          -Dformat=HTML
+          -Dformat=JSON
+          -DfailBuildOnCVSS=7
+
+      - name: Upload CVE report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cve-report
+          path: |
+            **/target/dependency-check-report.html
+            **/target/dependency-check-report.json
+

@@ -47,7 +47,7 @@ export class MySpace implements OnInit {
           this.filesError = 'Impossible de vérifier votre session pour le moment.';
         }
 
-        this.loadFiles();
+        this.loadFiles(true);
         this.loadHistory();
       },
     });
@@ -87,9 +87,11 @@ export class MySpace implements OnInit {
     });
   }
 
-  private loadFiles() {
+  private loadFiles(preserveExistingError = false) {
     this.isLoadingFiles = true;
-    this.filesError = '';
+    if (!preserveExistingError) {
+      this.filesError = '';
+    }
     this.fileService.listFiles().subscribe({
       next: (files) => {
         this.files = this.fileService.mergeWithCachedPreferences(files);

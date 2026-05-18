@@ -111,7 +111,7 @@ npm run test
 npm run test:ci -- --code-coverage
 ```
 
-**Résultat attendu:** ✅ 71/71 tests PASSED, coverage ≥ 62%
+**Résultat attendu:** ✅ 88/88 tests PASSED, coverage ≥ 70%
 
 ### Frontend - E2E (Playwright)
 
@@ -160,12 +160,12 @@ Migrations Flyway: V1-V5 ✅
 ### Frontend ✅
 
 ```
-Tests: 71/71 PASSED (100%)
-├── Services: 22/22 ✅
-├── Components: 49/49 ✅
+Tests: 88/88 PASSED (100%)
+├── Services: 28/28 ✅
+├── Components: 59/59 ✅
 └── Functional: 1/1 ✅
 
-Coverage: 62.37% (Functions) ⚠️ Cible: 70%
+Coverage: 92.07% (Functions, integration) ✅ Cible: 70%
 E2E: 5/5 ✅
 ```
 
@@ -229,9 +229,9 @@ npm start
 ### Frontend - Karma
 
 - **Cible:** ≥ 70%
-- **État:** ⚠️ 62.37% (gap: -7.63%)
+- **État:** ✅ 92.07% (au-dessus de 70%)
 - **Rapports:** `frontend/webapp/coverage/`
-- **Gap analysis:** voir `frontend/FRONTEND_TESTS_STATUS.md`
+- **Suivi détaillé:** voir `frontend/webapp/TEST_SUMMARY.md`
 
 ## Prochaines améliorations prioritaires
 
@@ -241,7 +241,7 @@ npm start
 - [x] k6 benchmarks réussis
 
 ### Court terme (Frontend)
-- [ ] Augmenter coverage à 70% (+7.63%)
+- [x] Augmenter coverage à 70%+ ✅
 - [ ] Valider E2E contre API réelle (non mock)
 - [ ] Tests d'accessibilité avancés
 - [ ] Tests de timeout/network errors

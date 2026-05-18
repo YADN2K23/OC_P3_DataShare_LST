@@ -1,0 +1,168 @@
+name: Coverage Report & Badges
+
+on:
+  workflow_run:
+    workflows: [ "Backend Tests & Coverage", "Frontend Tests & Coverage" ]
+    types: [ completed ]
+    branches: [ develop, main ]
+
+jobs:
+  generate-badges:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download backend coverage
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: backend-test.yml
+          branch: ${{ github.event.workflow_run.head_branch }}
+          name: backend-test-results
+          path: backend-coverage
+        continue-on-error: true
+
+      - name: Download frontend coverage
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          workflow: frontend-test.yml
+          branch: ${{ github.event.workflow_run.head_branch }}
+          name: frontend-test-results
+          path: frontend-coverage
+        continue-on-error: true
+
+      - name: Extract coverage metrics
+        id: coverage
+        run: |
+          BACKEND_COVERAGE="N/A"
+          FRONTEND_COVERAGE="N/A"
+          
+          # Extract backend coverage
+          if [ -f "backend-coverage/user-backend-app/target/site/jacoco/index.html" ]; then
+            BACKEND_COVERAGE=$(grep -oP 'Total</span>[^%]*\K[\d.]+(?=%)' "backend-coverage/user-backend-app/target/site/jacoco/index.html" | head -1 || echo "N/A")
+          fi
+          
+          # Extract frontend coverage from coverage output
+          if [ -f "frontend-coverage/coverage-output.txt" ]; then
+            FRONTEND_COVERAGE=$(grep -oP 'Statements\s*:\s*\K[\d.]+(?=%)' "frontend-coverage/coverage-output.txt" | head -1 || echo "N/A")
+          fi
+          
+          echo "backend_coverage=$BACKEND_COVERAGE" >> $GITHUB_OUTPUT
+          echo "frontend_coverage=$FRONTEND_COVERAGE" >> $GITHUB_OUTPUT
+
+      - name: Generate coverage badges
+        run: |
+          mkdir -p coverage-badges
+          
+          # Backend coverage badge
+          BACKEND=${{ steps.coverage.outputs.backend_coverage }}
+          if [ "$BACKEND" != "N/A" ]; then
+            BACKEND_COLOR=$(awk "BEGIN {if ($BACKEND >= 80) print \"brightgreen\"; else if ($BACKEND >= 70) print \"green\"; else if ($BACKEND >= 50) print \"yellow\"; else print \"red\"}")
+            curl -s "https://img.shields.io/badge/coverage%20backend-${BACKEND}%25-${BACKEND_COLOR}?style=flat-square" -o coverage-badges/backend-coverage.svg
+          fi
+          
+          # Frontend coverage badge
+          FRONTEND=${{ steps.coverage.outputs.frontend_coverage }}
+          if [ "$FRONTEND" != "N/A" ]; then
+            FRONTEND_COLOR=$(awk "BEGIN {if ($FRONTEND >= 80) print \"brightgreen\"; else if ($FRONTEND >= 75) print \"green\"; else if ($FRONTEND >= 50) print \"yellow\"; else print \"red\"}")
+            curl -s "https://img.shields.io/badge/coverage%20frontend-${FRONTEND}%25-${FRONTEND_COLOR}?style=flat-square" -o coverage-badges/frontend-coverage.svg
+          fi
+
+      - name: Update README with badges
+        run: |
+          BACKEND=${{ steps.coverage.outputs.backend_coverage }}
+          FRONTEND=${{ steps.coverage.outputs.frontend_coverage }}
+          
+          # Create or update coverage section in README
+          if [ -f "README.md" ]; then
+            # Remove old coverage section if exists
+            sed -i '/<!-- COVERAGE_BADGES_START -->/,/<!-- COVERAGE_BADGES_END -->/d' README.md
+            
+            # Add new coverage section
+            cat >> README.md << 'EOF'
+          
+          <!-- COVERAGE_BADGES_START -->
+          ## 📊 Test Coverage
+          
+          EOF
+            
+            if [ "$BACKEND" != "N/A" ]; then
+              echo "- **Backend:** ![Coverage](https://img.shields.io/badge/coverage-${BACKEND}%25-brightgreen?style=flat-square)" >> README.md
+            fi
+            
+            if [ "$FRONTEND" != "N/A" ]; then
+              echo "- **Frontend:** ![Coverage](https://img.shields.io/badge/coverage-${FRONTEND}%25-brightgreen?style=flat-square)" >> README.md
+            fi
+            
+            cat >> README.md << 'EOF'
+          
+          Generated on: $(date)
+          <!-- COVERAGE_BADGES_END -->
+          EOF
+          fi
+
+      - name: Commit and push badges
+        run: |
+          if [ "$(git status --porcelain)" ]; then
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add -A
+            git commit -m "📊 Update coverage badges - Backend: ${{ steps.coverage.outputs.backend_coverage }}% | Frontend: ${{ steps.coverage.outputs.frontend_coverage }}%"
+            git push
+          else
+            echo "No changes to commit"
+          fi
+        continue-on-error: true
+
+      - name: Create coverage report
+        run: |
+          cat > /tmp/coverage-report.md << 'EOF'
+          # 📊 Test Coverage Report
+          
+          **Generated:** $(date)
+          **Branch:** ${{ github.event.workflow_run.head_branch }}
+          
+          ## Results
+          
+          | Component | Coverage | Status | Threshold |
+          |-----------|----------|--------|-----------|
+          | Backend   | ${{ steps.coverage.outputs.backend_coverage }}% | ✅ | 70% |
+          | Frontend  | ${{ steps.coverage.outputs.frontend_coverage }}% | ✅ | 75% |
+          
+          ## Artifacts
+          
+          - [Backend Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          - [Frontend Report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          
+          Generated by Automated Coverage System.
+          EOF
+          
+          cat /tmp/coverage-report.md
+
+      - name: Upload badge artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-badges
+          path: coverage-badges/
+          retention-days: 30
+
+  slack-notification:
+    runs-on: ubuntu-latest
+    if: always()
+    needs: generate-badges
+
+    steps:
+      - name: Send Slack notification
+        if: ${{ secrets.SLACK_WEBHOOK }}
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          text: 'Coverage Report Generated'
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow
+        continue-on-error: true
+

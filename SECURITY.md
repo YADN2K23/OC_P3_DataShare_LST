@@ -35,7 +35,7 @@ Fichier concerne: `user-backend-app/src/main/resources/application.yml`
 - Ne pas commiter de secret de production en clair.
 - Utiliser des variables d'environnement pour les secrets hors environnement local.
 - Conserver des secrets differents par environnement (dev/test/prod).
-- Fournir les secrets Docker via `datashare-backend/.env` local non commite ou via le gestionnaire de secrets de l'environnement cible.
+- Fournir les secrets Docker via `backend/.env` local non commite ou via le gestionnaire de secrets de l'environnement cible.
 
 Variables d'environnement attendues:
 

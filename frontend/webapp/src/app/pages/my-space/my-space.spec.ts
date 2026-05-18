@@ -285,5 +285,67 @@ describe('MySpace (integration)', () => {
 
     expect(component.isProtected(file as any)).toBeFalse();
   });
-});
 
+  // === PHASE 2: Composants edge cases ===
+
+  it('rafraichit l\'historique après suppression reussie', () => {
+    authService.getMe.and.returnValue(of({ login: 'john@doe.fr' }));
+    fileService.deleteFile.and.returnValue(of(void 0));
+    fileService.listHistory.and.returnValue(of([]));
+
+    const fixture = TestBed.createComponent(MySpace);
+    const component = fixture.componentInstance;
+    component.files = [
+      {
+        storedFileName: 'file.txt',
+        originalFileName: 'file.txt',
+        contentType: 'text/plain',
+        size: 5,
+        createdAt: '2026-04-11T00:00:00Z',
+      },
+    ];
+
+    // Count initial calls
+    const initialCallCount = fileService.listHistory.calls.count();
+
+    component.onDeleteFile('file.txt');
+
+    // Should call listHistory again after delete
+    expect(fileService.listHistory.calls.count()).toBe(initialCallCount + 1);
+    expect(component.files.length).toBe(0);
+  });
+
+  it('affiche une erreur de session en cas d\'erreur getMe globale (non 401)', () => {
+    authService.getMe.and.returnValue(throwError(() =>
+      new HttpErrorResponse({ status: 503, statusText: 'Service Unavailable' })
+    ));
+
+    const fixture = TestBed.createComponent(MySpace);
+    fixture.detectChanges();  // Trigger change detection
+
+    // After initialization with error, filesError should be set
+    expect(fixture.componentInstance.filesError).toContain('session');
+  });
+
+  it('gere les fichiers avec noms tres longs', () => {
+    const longName = 'a'.repeat(255) + '.pdf';
+    authService.getMe.and.returnValue(of({ login: 'john@doe.fr' }));
+    fileService.listFiles.and.returnValue(
+      of([
+        {
+          storedFileName: 'long_' + longName,
+          originalFileName: longName,
+          contentType: 'application/pdf',
+          size: 1000,
+          createdAt: '2026-05-10T00:00:00Z',
+        },
+      ])
+    );
+
+    const fixture = TestBed.createComponent(MySpace);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.files.length).toBe(1);
+    expect(fixture.componentInstance.files[0].originalFileName).toBe(longName);
+  });
+});

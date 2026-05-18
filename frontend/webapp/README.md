@@ -7,7 +7,7 @@ Frontend Angular connecté au backend Spring Boot. UI basée sur template `../da
 - `/` : landing page (public)
 - `/login` : connexion (public)
 - `/register` : inscription (public)
-- `/upload` : téléversement (protégé)
+- `/upload` : téléversement (protégé, limite front < 1 Go)
 - `/download` : téléchargement (public)
 - `/my-space` : espace utilisateur (protégé)
 
@@ -30,7 +30,7 @@ Puis ouvrir `http://localhost:4200` (l'API doit tourner sur `http://localhost:80
 Depuis la racine du workspace :
 
 ```bash
-docker compose -f datashare-backend/compose.yaml up --build
+docker compose -f ../../backend/compose.yaml up --build
 ```
 
 Puis, dans `datashare-frontend/webapp` :
@@ -43,7 +43,7 @@ Ensuite ouvrir `http://localhost:4200`.
 
 ### Configuration Docker Compose backend
 
-Le fichier `datashare-backend/compose.yaml` lance :
+Le fichier `../../backend/compose.yaml` lance :
 - Backend: `http://localhost:8080`
 - PostgreSQL: `localhost:5432`
 
@@ -96,7 +96,7 @@ Ce fallback permet le refresh direct des routes Angular (`/login`, `/register`, 
 
 ## Tests (Phase 3)
 
-📊 **État détaillé des tests** : Voir `../FRONTEND_TESTS_STATUS.md`
+📊 **État détaillé des tests** : Voir `TEST_SUMMARY.md` et `COMPLETION_REPORT.md`
 
 ### Installer les dépendances de test
 
@@ -122,6 +122,8 @@ $env:CHROME_BIN = "$env:LOCALAPPDATA\ms-playwright\chromium-1217\chrome-win64\ch
 ```bash
 npm run test:integration
 ```
+
+Le périmètre d'intégration inclut aussi `src/app/pages/service-coverage.spec.ts`, qui couvre les chemins croisés des services `AuthService` et `FileService`.
 
 ### Tests fonctionnels
 

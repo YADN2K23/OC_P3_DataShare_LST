@@ -20,12 +20,12 @@ Contient la logique applicative du domaine user:
 - filtre JWT HTTP
 - regles d'autorisation (`SecurityFilterChain`)
 - endpoint protege de demonstration (`/api/me`)
-- persistance PostgreSQL/Flyway pour les comptes utilisateur
-- cycle fichier complet: upload, download protege, suppression proprietaire, creation de lien de partage et download public via token
+- persistance PostgreSQL/Flyway pour les comptes utilisateur et les metadonnees fichiers
+- cycle fichier complet: upload, download protege, suppression proprietaire, creation de lien de partage et download public via token; les binaires restent sur stockage local/volume
 
 ## Principe de separation
 
 - Ce qui depend du domaine metier reste dans l'application.
 - Ce qui est purement technique et reutilisable va dans `auth-core`.
-- Le socle d'execution local est compose avec PostgreSQL pour la persistence et un stockage fichier local pour les binaires du prototype.
+- Le socle d'execution local est compose avec PostgreSQL comme source de verite des metadonnees et un stockage fichier local pour les binaires du prototype.
 

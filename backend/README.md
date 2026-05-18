@@ -30,9 +30,9 @@ backend/
 ├── compose.yaml                        # Docker Compose (développement)
 ├── Dockerfile                          # Image production
 ├── .env.example                        # Secrets (template)
-├── MAINTENANCE.md                      # Exploitation & maintenance
-├── TESTING.md                          # Plan de tests
-├── PERF.md                             # Performance & benchmarks
+├── ../MAINTENANCE.md                   # Exploitation & maintenance
+├── ../TESTING.md                       # Plan de tests
+├── ../PERF.md                          # Performance & benchmarks
 ├── SECURITY.md                         # Politique sécurité
 └── README.md                           # Ce fichier
 
@@ -132,14 +132,15 @@ Write-Host $me
 - **MIME type + signature** file validation
 - **CORS** contrôlé
 
-## 📡 API REST (10 endpoints)
+## 📡 API REST (12 endpoints)
 
 ### Authentification
 
 ```
 POST   /api/register          → Créer compte
 POST   /api/login             → Se connecter (retourne JWT)
-POST   /api/refresh           → Renouveler token
+POST   /api/refresh           → Renouveler le JWT via le cookie `refresh_token`
+POST   /api/logout            → Révoquer le refresh token et effacer le cookie
 GET    /api/me                → Récupérer profil utilisateur
 ```
 
@@ -162,6 +163,12 @@ POST   /api/files/{storedFileName}/share  → Créer lien de partage
 ### Détails complets
 
 → Voir `docs/SWAGGER_GUIDE.md`
+
+### Flux d'authentification
+
+- `POST /api/login` renvoie le JWT d'accès dans le corps JSON et pose aussi un cookie `refresh_token` HttpOnly.
+- `POST /api/refresh` renouvelle le JWT à partir de ce cookie.
+- `POST /api/logout` révoque le refresh token et vide le cookie.
 
 ## 🧪 Tests
 
@@ -219,7 +226,7 @@ $env:VUS="10"; $env:DURATION="1m"
 k6 run ..\perf\files_k6.js
 ```
 
-→ Voir `PERF.md` pour détails complets
+→ Voir `../PERF.md` pour détails complets
 
 ## 🔐 Sécurité
 
@@ -275,9 +282,9 @@ app:
 - **Swagger YAML:** `http://localhost:8080/v3/api-docs`
 - **Guide API:** `docs/SWAGGER_GUIDE.md`
 - **Architecture:** root `DOCUMENTATION_TECHNIQUE.md`
-- **Maintenance:** `MAINTENANCE.md`
-- **Tests:** `TESTING.md`
-- **Performance:** `PERF.md`
+- **Maintenance:** `../MAINTENANCE.md`
+- **Tests:** `../TESTING.md`
+- **Performance:** `../PERF.md`
 - **Sécurité:** `SECURITY.md`
 
 ## 🚀 Déploiement
@@ -361,8 +368,8 @@ mvn clean test -DskipTests=false
 
 - **Code:** Stack Overflow, GitHub Issues
 - **Docs:** `DOCUMENTATION_TECHNIQUE.md`
-- **Maintenance:** Voir `MAINTENANCE.md`
-- **Tests:** Voir `TESTING.md`
+- **Maintenance:** Voir `../MAINTENANCE.md`
+- **Tests:** Voir `../TESTING.md`
 
 ---
 
