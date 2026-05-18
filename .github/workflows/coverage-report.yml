@@ -4,7 +4,7 @@ on:
   workflow_run:
     workflows: [ "Backend Tests & Coverage", "Frontend Tests & Coverage" ]
     types: [ completed ]
-     branches: [ develop, main, docs/harmonisation-v2 ]
+    branches: [ develop, main, docs/harmonisation-v2 ]
 
 jobs:
   generate-badges:
